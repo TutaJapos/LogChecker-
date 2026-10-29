@@ -150,6 +150,7 @@ packet-mine | Packet Mine
 dupe | Duplication Exploit
 baritone | Baritone Automation
 
+[resourcepacks]
 # === RESOURCE PACK / VISUAL CHEATS ===
 xray ultimate | Xray Ultimate
 xray ultimate | Xray Ultimate Resource Pack
