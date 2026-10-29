@@ -154,6 +154,7 @@ baritone | Baritone Automation
 xray ultimate | Xray Ultimate
 xray ultimate | Xray Ultimate Resource Pack
 xray-texture-pack | Xray Texture Pack
+Xray_Ultimate | Xray Ultimate
 ore-highlight | Ore Highlight Pack
 cave-xray | Cave Xray Pack
 transparent-ores | Transparent Ores Pack
