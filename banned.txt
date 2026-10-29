@@ -133,6 +133,8 @@ fullbright | FullBright
 full-bright | Full Bright
 entityradar | Entity Radar
 entity-radar | Entity Radar
+xaerominimap | Xaero Minimap
+xaeroworldmap | Xaero World Map
 
 # === INVENTORY / UTILITY CHEATS ===
 inventorymove | Inventory Move
@@ -149,6 +151,7 @@ packetmine | Packet Mine
 packet-mine | Packet Mine
 dupe | Duplication Exploit
 baritone | Baritone Automation
+litematica_printer | Litematica Printer
 
 [resourcepacks]
 # === RESOURCE PACK / VISUAL CHEATS ===
