@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Minecraft Log Analyzer</title><style>*{box-sizing:border-box}body{margin:0;background:#0B0F14;color:#E5E7EB;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:#42D392;text-decoration:none}a:hover{text-decoration:underline}.wrap{max-width:980px;margin:0 auto;padding:0 18px 50px}
+.top{border-bottom:1px solid #1f2937}.top .wrap{display:flex;align-items:center;padding:14px 18px}.logo{font-weight:700;font-size:17px}.logo b{color:#42D392}.sp{flex:1}
+.btn{display:inline-block;background:#42D392;color:#0B0F14;border:0;border-radius:8px;padding:9px 16px;font-weight:600;cursor:pointer;font-size:14px}.btn:hover{text-decoration:none;filter:brightness(1.08)}.btn:disabled{opacity:.6}
+.card{background:#151B23;border:1px solid #1f2937;border-radius:12px;padding:18px;margin-top:16px}h2{font-size:16px;margin:0 0 10px}.muted{color:#9CA3AF}.small{font-size:13px}
+.verdict{border-left:6px solid var(--c);margin-top:20px}.verdict h1{margin:0;font-size:24px;color:var(--c)}
+.tabs{display:flex;gap:6px;margin-top:20px;border-bottom:1px solid #1f2937}.tab{background:none;border:0;color:#9CA3AF;padding:10px 16px;cursor:pointer;font-size:15px;border-bottom:3px solid transparent}
+.tab.on{color:#E5E7EB;border-color:#42D392}.dot{background:#EF4444;color:#fff;border-radius:999px;font-size:12px;padding:1px 7px;margin-left:6px}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;color:#0B0F14}.red{background:#EF4444}.amber{background:#F59E0B}.green{background:#42D392}.grey{background:#6B7280;color:#fff}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;color:#9CA3AF;font-weight:600;padding:8px 10px;border-bottom:1px solid #263041}
+td{padding:9px 10px;border-bottom:1px solid #1b2430;vertical-align:top}tr:hover td{background:#18202b}tr[hidden],.pane[hidden]{display:none}
+code,pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}pre{background:#0B0F14;border-radius:8px;padding:10px;overflow-x:auto;margin:6px 0;white-space:pre-wrap;word-break:break-all}
+details summary{cursor:pointer;color:#42D392}details ul{margin:6px 0 0;padding-left:18px;max-height:220px;overflow:auto}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 10px}.chip{background:#1b2430;color:#E5E7EB;border:0;border-radius:999px;padding:5px 14px;cursor:pointer;font-size:13px}.chip.on{background:#42D392;color:#0B0F14}
+input[type=search],input[type=text],input[type=password],select{background:#0B0F14;border:1px solid #263041;color:#E5E7EB;border-radius:8px;padding:8px 12px;font-size:14px}
+.find{border-left:5px solid var(--c)}.find h3{margin:0 0 6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:17px}.lbl{color:#9CA3AF;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-top:10px}
+.dz{border:2px dashed #2b3647;border-radius:14px;padding:44px 20px;text-align:center;cursor:pointer}.dz.over{border-color:#42D392;background:#122019}.dz big{display:block;font-size:19px;margin-bottom:4px}
+.fl{list-style:none;padding:0;margin:12px 0 0}.fl li{padding:3px 0;color:#cbd5e1}.hero2{padding:34px 0 4px}.hero2 h1{font-size:28px;margin:0 0 6px}.hero2 h1 b{color:#42D392}</style><div class="top"><div class="wrap"><div class="logo">⛏ Minecraft <b>Log Analyzer</b></div></div></div>
+<div class="wrap"><div class="hero2"><h1>Check logs for <b>banned mods and packs</b></h1><p class="muted">Upload logs, a logs.zip of .log.gz files, mod JARs or resource packs.</p></div>
+<form class="card" method="post" action="/scan" enctype="multipart/form-data" id="form">
+<input type="text" name="case" placeholder="Case or player name (optional)" maxlength="200" style="width:100%;margin-bottom:14px">
+<div class="dz" id="dz"><big>Drop files here or click to choose</big><span class="muted small">.log .gz .zip .jar .txt</span></div>
+<input type="file" id="f" name="files" multiple required hidden accept=".log,.txt,.gz,.zip,.jar"><ul class="fl" id="list"></ul>
+<p id="err" style="color:#EF4444;margin:10px 0 0"></p><button class="btn" id="go" style="margin-top:14px">Scan files</button></form>
+<p class="muted small">Banned list: maintained by the site owner. Edit <code>banned.txt</code> to change it. Files are read in memory, never run, and not stored. Results are evidence for a human reviewer, not a verdict.</p></div><script>const MAXMB=4;const f=document.getElementById('f'),dz=document.getElementById('dz'),ls=document.getElementById('list');
+function show(){ls.replaceChildren();for(const x of f.files){const li=document.createElement('li');li.textContent=x.name+'  ('+Math.round(x.size/1024)+' KB)';ls.appendChild(li)}}
+dz.onclick=()=>f.click();f.onchange=show;dz.ondragover=e=>{e.preventDefault();dz.classList.add('over')};dz.ondragleave=()=>dz.classList.remove('over');
+dz.ondrop=e=>{e.preventDefault();dz.classList.remove('over');f.files=e.dataTransfer.files;show()};
+document.getElementById('form').onsubmit=e=>{let t=0;for(const x of f.files)t+=x.size;if(t>MAXMB*1048576){e.preventDefault();document.getElementById('err').textContent='Too large: '+(t/1048576).toFixed(1)+' MB in total. The limit is '+MAXMB+' MB per scan - upload fewer or smaller files.';return}
+const b=document.getElementById('go');b.textContent='Analyzing... please wait';setTimeout(()=>b.disabled=true,0)}</script></html>
