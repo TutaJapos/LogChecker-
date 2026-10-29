@@ -22,7 +22,7 @@ input[type=search],input[type=text],input[type=password],select{background:#0B0F
 <div class="dz" id="dz"><big>Drop files here or click to choose</big><span class="muted small">.log .gz .zip .jar .txt</span></div>
 <input type="file" id="f" name="files" multiple required hidden accept=".log,.txt,.gz,.zip,.jar"><ul class="fl" id="list"></ul>
 <p id="err" style="color:#EF4444;margin:10px 0 0"></p><button class="btn" id="go" style="margin-top:14px">Scan files</button></form>
-<p class="muted small">Banned list: maintained by the site owner. Edit <code>banned.txt</code> to change it. Files are read in memory, never run, and not stored. Results are evidence for a human reviewer, not a verdict.</p></div><script>const MAXMB=4;const f=document.getElementById('f'),dz=document.getElementById('dz'),ls=document.getElementById('list');
+<p class="muted small">Maximum upload size: 4.5 MB per scan. Banned list: maintained by the site owner. Edit <code>banned.txt</code> to change it. Files are read in memory, never run, and not stored. Results are evidence for a human reviewer, not a verdict.</p></div><script>const MAXMB=4;const f=document.getElementById('f'),dz=document.getElementById('dz'),ls=document.getElementById('list');
 function show(){ls.replaceChildren();for(const x of f.files){const li=document.createElement('li');li.textContent=x.name+'  ('+Math.round(x.size/1024)+' KB)';ls.appendChild(li)}}
 dz.onclick=()=>f.click();f.onchange=show;dz.ondragover=e=>{e.preventDefault();dz.classList.add('over')};dz.ondragleave=()=>dz.classList.remove('over');
 dz.ondrop=e=>{e.preventDefault();dz.classList.remove('over');f.files=e.dataTransfer.files;show()};
