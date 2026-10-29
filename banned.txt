@@ -1,0 +1,22 @@
+# banned.txt - edit this file to change what is banned. Changes apply on the next scan (no restart).
+# Lines are:  key | Display Name      ("| Display Name" is optional). Lines starting with # are comments.
+#
+# [mods]: key = the mod ID (as in fabric.mod.json / mods.toml). A match on the real mod ID in the player's
+#   loaded-mod list or JAR metadata = CONFIRMED MATCH. A similar JAR filename alone = only SUSPICIOUS.
+#   Verify IDs against the real mod before relying on them; avoid very short/generic IDs (false positives).
+# [resourcepacks]: key = text in the pack filename (SUSPICIOUS only: filenames can be renamed), or
+#   sha256:<hash of the pack .zip> | Name  for an exact, verified match (CONFIRMED MATCH).
+#   Packs that hide stone/dirt while keeping ores visible are also flagged automatically as X-ray-like.
+
+[mods]
+meteor-client | Meteor Client
+wurst | Wurst Client
+liquidbounce | LiquidBounce
+bleachhack | BleachHack
+aristois | Aristois
+rusherhack | RusherHack
+
+[resourcepacks]
+xray ultimate | Xray Ultimate
+xray | X-ray pack (name)
+# sha256:0123abcd...  | Known X-ray pack (verified hash)
