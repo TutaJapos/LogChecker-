@@ -129,8 +129,6 @@ itemesp | Item ESP
 item-esp | Item ESP
 mobesp | Mob ESP
 mob-esp | Mob ESP
-fullbright | FullBright
-full-bright | Full Bright
 entityradar | Entity Radar
 entity-radar | Entity Radar
 xaerominimap | Xaero Minimap
