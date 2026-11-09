@@ -68,6 +68,9 @@ autoloot | AutoLoot
 auto-loot | Auto Loot
 autoclick | AutoClick
 auto-click | Auto Click
+auto_clicker | Auto Click
+toros-auto-attack | Auto Attack
+toros-auto-mine | Auto Mine
 
 # === COMBAT CHEATS ===
 killaura | KillAura
