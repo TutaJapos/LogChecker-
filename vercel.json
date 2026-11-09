@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/favicon.png",
-      "destination": "/favicon.png"
-    },
-    {
       "source": "/(.*)",
       "destination": "/api/index"
     }
