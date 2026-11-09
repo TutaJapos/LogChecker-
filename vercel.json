@@ -1,4 +1,18 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
-  "functions": { "api/index.py": { "maxDuration": 60, "includeFiles": "{banned.txt,engine/**}" } }
+  "rewrites": [
+    {
+      "source": "/favicon.png",
+      "destination": "/favicon.png"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/index"
+    }
+  ],
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60,
+      "includeFiles": "{banned.txt,engine/**}"
+    }
+  }
 }
