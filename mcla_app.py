@@ -58,10 +58,25 @@ class Handler(BaseHTTPRequestHandler):
         if p.startswith("/api/index"): p = p[len("/api/index"):]      # Vercel rewrite prefix
         return p.rstrip("/") or "/"
     def do_GET(self):
-        path = self._path()
-        if path == "/": return self._send(200, index_page())
-        if path == "/health": return self._send(200, "ok", "text/plain; charset=utf-8")
-        self._err(404, "Not found")
+    path = self._path()
+
+    if path == "/favicon.png":
+        favicon = BASE / "public" / "favicon.png"
+        if favicon.is_file():
+            return self._send(
+                200,
+                favicon.read_bytes(),
+                "image/png"
+            )
+        return self._err(404, "Favicon not found")
+
+    if path == "/":
+        return self._send(200, index_page())
+
+    if path == "/health":
+        return self._send(200, "ok", "text/plain; charset=utf-8")
+
+    self._err(404, "Not found")
     def do_POST(self):
         if self._path() != "/scan": return self._err(404, "Not found")
         try:
