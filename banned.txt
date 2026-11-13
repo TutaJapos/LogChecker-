@@ -155,6 +155,7 @@ packet-mine | Packet Mine
 dupe | Duplication Exploit
 baritone | Baritone Automation
 litematica_printer | Litematica Printer
+commandkeys | Command Macro
 
 [resourcepacks]
 # === RESOURCE PACK / VISUAL CHEATS ===
