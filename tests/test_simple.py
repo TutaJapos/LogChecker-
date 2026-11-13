@@ -13,7 +13,23 @@ def zipb(d):
         for k, v in d.items(): z.writestr(k, v)
     return b.getvalue()
 
+NEOLOG = ("[09:25:54] [main/INFO]: Starting FancyModLoader version 10.0.36 (CLIENT in PROD)\r\n"
+          "[09:26:05] [ForkJoinPool.commonPool-worker-3/INFO]: \r\n     Mod List:\r\n\t\tName Version (Mod Id)\r\n\r\n"
+          "\t\tFerrite Core 8.2.0 (ferritecore)\r\n\t\tKotlin For Forge 6.3.0 (kotlinforforge)\r\n"
+          "\t\tMinecraft 1.21.11 (minecraft)\r\n\t\t%s 1.0 (%s)\r\n\t\tNeoForge 21.11.45 (neoforge)\r\n"
+          "[09:26:06] [main/INFO]: Loading FML Plugins:\r\n")
+
 class Engine(unittest.TestCase):
+    def test_neoforge_mod_list_parsed(self):
+        from engine.logparser import parse_log
+        p = parse_log(NEOLOG % ("Freecam", "freecam"), "latest.log")
+        self.assertEqual(set(p.mods), {"ferritecore", "kotlinforforge", "minecraft", "freecam", "neoforge"})
+        self.assertEqual((p.loader, p.loader_version, p.minecraft), ("NeoForge", "21.11.45", "1.21.11"))
+    def test_neoforge_banned_mod_confirmed(self):
+        r = scan({"latest.log": (NEOLOG % ("Meteor Client", "meteor-client")).encode()})["result"]
+        self.assertEqual(r["overall"], "CONFIRMED MATCH")
+    def test_neoforge_clean(self):
+        self.assertEqual(scan({"latest.log": (NEOLOG % ("Lithium", "lithium")).encode()})["overall"], "CLEAN IN ANALYZED DATA")
     def test_banned_mod_id_confirmed(self):
         r = scan({"latest.log": (LOG % "meteor-client").encode()})["result"]
         self.assertEqual(r["overall"], "CONFIRMED MATCH"); self.assertEqual(r["findings"][0]["product"], "Meteor Client")
