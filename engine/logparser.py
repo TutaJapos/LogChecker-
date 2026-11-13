@@ -7,6 +7,9 @@ JAVA = re.compile(r"Java(?: Version:| is| runtime version)?\s*(\d+(?:\.\d+)*[\w.
 LOADER = re.compile(r"(Fabric Loader|Quilt Loader|NeoForge|Forge)[\s:/]+v?(\d[\w.+-]*)", re.I)
 MODCOUNT = re.compile(r"Loading \d+ mods?:")
 MODITEM = re.compile(r"^\s*-\s+([a-z0-9_.\-]+)\s+(\S+)")
+# NeoForge / Forge print one multi-line log entry:  "Mod List:" then "\t\tDisplay Name 1.2.3 (modid)"
+NEOLIST = re.compile(r"\bMod List:", re.I)
+NEOMOD = re.compile(r"^\s+(?P<name>.+?)\s+(?P<ver>\S+)\s+\((?P<id>[A-Za-z0-9_.\-]+)\)\s*$")
 FAIL = re.compile(r"(failed to (?:load|initiali[sz]e)|exception|could not (?:load|initiali[sz]e))", re.I)
 RELOAD = re.compile(r"Reloading ResourceManager:\s*(.*)$")
 PACK = re.compile(r"(?:resource ?pack|Reloading ResourceManager)", re.I)
@@ -32,7 +35,7 @@ class ParsedLog:
     notes: list = field(default_factory=list)
 
 def parse_log(text: str, source: str) -> ParsedLog:
-    p, in_mods, last_ts = ParsedLog(source), False, None
+    p, in_mods, in_neo, last_ts = ParsedLog(source), False, False, None
     lines = text.splitlines()
     p.line_count = len(lines)
     for n, raw in enumerate(lines, 1):
@@ -42,8 +45,17 @@ def parse_log(text: str, source: str) -> ParsedLog:
             if m["logger"] and m["logger"] not in p.loggers:
                 p.loggers[m["logger"]] = Ev(source, n, raw[:300], m["ts"])
             in_mods = bool(MODCOUNT.search(msg))
+            in_neo = bool(NEOLIST.search(msg))
         else:
             msg = raw
+            if NEOLIST.search(raw): in_neo = True; continue
+            if in_neo:
+                nm = NEOMOD.match(raw)
+                if nm:
+                    mid = nm["id"].lower()
+                    if mid not in p.mods: p.mods[mid] = (nm["ver"], Ev(source, n, raw.strip()[:300], last_ts))
+                    continue
+                if raw.strip() and not raw.startswith((" ", "\t")): in_neo = False
             mi = MODITEM.match(raw) if in_mods else None
             if mi and mi[1] not in p.mods:
                 p.mods[mi[1]] = (mi[2], Ev(source, n, raw.strip()[:300], last_ts))
@@ -57,6 +69,11 @@ def parse_log(text: str, source: str) -> ParsedLog:
         if (x := RELOAD.search(msg)):
             p.reloads.append({"packs": [t.strip() for t in x[1].split(",") if t.strip()], "ev": Ev(source, n, raw[:300], last_ts)})
         if PACK.search(msg): p.pack_events.append(Ev(source, n, raw[:300], last_ts))
+    # NeoForge/Forge list the loader and Minecraft as pseudo-mods; this is more reliable than the free-text regexes
+    # (which can pick up e.g. "Kotlin For Forge 6.3.0" as the loader).
+    for lid, lname in (("neoforge", "NeoForge"), ("forge", "Forge")):
+        if lid in p.mods: p.loader, p.loader_version = lname, p.mods[lid][0]; break
+    if "minecraft" in p.mods and not p.minecraft: p.minecraft = p.mods["minecraft"][0]
     p.complete = bool(p.mods) or "Stopping!" in text or "Stopping server" in text
     if not p.mods: p.notes.append("No loader mod list found; mod inventory may be incomplete.")
     if not p.minecraft: p.notes.append("Minecraft version not found.")
