@@ -12,7 +12,7 @@ from engine import banned, detection, page
 
 BASE = Path(__file__).parent
 BANNED = Path(os.environ.get("MCLA_BANNED", BASE / "banned.txt"))
-ALLOWED = (".log", ".txt", ".gz", ".zip", ".jar")
+ALLOWED = (".log", ".txt", ".gz", ".zip", ".rar", ".jar")
 
 def max_mb(): return int(os.environ.get("MCLA_MAX_MB") or ("4" if os.environ.get("VERCEL") else "200"))  # Vercel rejects bodies over ~4.5 MB
 
