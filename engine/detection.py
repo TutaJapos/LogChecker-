@@ -3,7 +3,7 @@ from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from .logparser import parse_log, ParsedLog
 from .metadata import inspect_jar
-from .safe_archive import read_zip, read_gzip, ArchiveError
+from .safe_archive import read_zip, read_rar, read_gzip, is_rar, ArchiveError
 from .resourcepack import analyze_pack, pack_findings, parse_options, log_pack_findings, build_pack_table
 
 DB = json.loads((Path(__file__).parent / "signatures.json").read_text())
@@ -79,8 +79,9 @@ def analyze(files: dict, policy: dict = None) -> dict:
                 handle(name[:-3], read_gzip(data), depth, disp or name)
             elif low.endswith(".jar"):
                 jars.append(inspect_jar(name, data))
-            elif low.endswith(".zip") and depth < 2:
-                ex = read_zip(data); warnings.extend(ex.warnings)
+            elif low.endswith((".zip", ".rar")) and depth < 2:
+                ex = read_rar(data) if (low.endswith(".rar") or is_rar(data)) else read_zip(data)
+                warnings.extend(ex.warnings)
                 if "pack.mcmeta" in ex.files:
                     packs.append(analyze_pack(name, data, ex.files, DB.get("resource_packs", [])))
                 else:

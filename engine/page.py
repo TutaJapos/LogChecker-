@@ -58,11 +58,11 @@ def _csv(mods):
 
 def render_index(info, max_mb=200):
     body = f"""<div class="top"><div class="wrap"><div class="logo">⛏ Minecraft <b>Log Analyzer</b></div></div></div>
-<div class="wrap"><div class="hero2"><h1>Check logs for <b>banned mods and packs</b></h1><p class="muted">Upload logs, a logs.zip of .log.gz files, mod JARs or resource packs.</p></div>
+<div class="wrap"><div class="hero2"><h1>Check logs for <b>banned mods and packs</b></h1><p class="muted">Upload logs, a logs.zip / logs.rar of .log.gz files, mod JARs or resource packs.</p></div>
 <form class="card" method="post" action="/scan" enctype="multipart/form-data" id="form">
 <input type="text" name="case" placeholder="Case or player name (optional)" maxlength="200" style="width:100%;margin-bottom:14px">
-<div class="dz" id="dz"><big>Drop files here or click to choose</big><span class="muted small">.log .gz .zip .jar .txt</span></div>
-<input type="file" id="f" name="files" multiple required hidden accept=".log,.txt,.gz,.zip,.jar"><ul class="fl" id="list"></ul>
+<div class="dz" id="dz"><big>Drop files here or click to choose</big><span class="muted small">.log .gz .zip .rar .jar .txt</span></div>
+<input type="file" id="f" name="files" multiple required hidden accept=".log,.txt,.gz,.zip,.rar,.jar"><ul class="fl" id="list"></ul>
 <p id="err" style="color:#EF4444;margin:10px 0 0"></p><button class="btn" id="go" style="margin-top:14px">Scan files</button></form>
 <p class="muted small">Banned list: {E(info)}. Edit <code>banned.txt</code> to change it. Files are read in memory, never run, and not stored. Results are evidence for a human reviewer, not a verdict.</p></div>"""
     js = """<script>const f=document.getElementById('f'),dz=document.getElementById('dz'),ls=document.getElementById('list');
