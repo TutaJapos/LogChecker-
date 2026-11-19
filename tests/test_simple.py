@@ -150,3 +150,70 @@ class LogPacks(unittest.TestCase):
         line = RELOAD % "Faithful.zip" + ", file/FolderPack, sodium, iris, mod_resources"
         names = [x["pack"] for x in scan({"latest.log": pack_log(line)})["result"]["pack_table"]]
         self.assertEqual(names, ["Faithful.zip"])
+
+
+class RarSupport(unittest.TestCase):
+    """RAR backend is faked (no unrar lib needed to run tests); we test routing, limits and errors."""
+    MAGIC = b"Rar!\x1a\x07\x01\x00"
+
+    class _Info:
+        def __init__(s, fn, size, packed=0): s.filename, s.file_size, s.compress_size = fn, size, packed
+        def is_dir(s): return s.filename.endswith("/")
+
+    class _FakeRar:
+        def __init__(s, entries): s.entries = entries
+        def needs_password(s): return False
+        def infolist(s): return [RarSupport._Info(k, len(v)) for k, v in s.entries.items()]
+        def open(s, info): return io.BytesIO(s.entries[info.filename])
+        def close(s): pass
+
+    def _patch(self, entries):
+        from engine import safe_archive as sa
+        orig = sa._open_rar_backend
+        sa._open_rar_backend = lambda path: self._FakeRar(entries)
+        self.addCleanup(setattr, sa, "_open_rar_backend", orig)
+
+    def test_rar_magic_detected(self):
+        from engine.safe_archive import is_rar
+        self.assertTrue(is_rar(self.MAGIC + b"x")); self.assertTrue(is_rar(b"Rar!\x1a\x07\x00x")); self.assertFalse(is_rar(b"PK\x03\x04"))
+
+    def test_fake_rar_logs_scanned(self):
+        import gzip
+        self._patch({"logs/a.log.gz": gzip.compress((LOG % "meteor-client").encode()), "../evil": b"x"})
+        r = scan({"logs.rar": self.MAGIC + b"payload"})["result"]
+        self.assertEqual(r["overall"], "CONFIRMED MATCH")
+        mods = {m["mod_id"]: m for m in r["mod_table"]}
+        self.assertEqual([x["source"] for x in mods["meteor-client"]["found_in"]], ["logs.rar!/logs/a.log.gz"])
+        self.assertTrue(any("unsafe" in w for w in r["warnings"]))
+
+    def test_rar_pack_detected(self):
+        self._patch({"pack.mcmeta": json.dumps({"pack": {"pack_format": 15}}).encode()})
+        r = scan({"Xray Ultimate 1.20.rar": self.MAGIC + b"p"})["result"]
+        self.assertTrue(r["resource_packs"])
+
+    def test_fake_rar_with_wrong_extension_still_routed(self):
+        self._patch({"a.log": (LOG % "meteor-client").encode()})
+        self.assertEqual(scan({"logs.zip": self.MAGIC + b"p"})["overall"], "CONFIRMED MATCH")
+
+    def test_bad_rar_is_analysis_error(self):
+        self.assertEqual(scan({"bad.rar": b"not a rar"})["overall"], "ANALYSIS ERROR")
+
+    def test_missing_backend_message(self):
+        from engine import safe_archive as sa
+        orig = sa._open_rar_backend
+        def boom(path): raise sa.ArchiveError("RAR support is not installed on this server (pip install unrar-cffi)")
+        sa._open_rar_backend = boom
+        self.addCleanup(setattr, sa, "_open_rar_backend", orig)
+        r = scan({"x.rar": self.MAGIC + b"p"})["result"]
+        self.assertEqual(r["overall"], "ANALYSIS ERROR"); self.assertIn("not installed", r["errors"][0]["error"])
+
+    def test_upload_allows_rar(self):
+        self.assertIn(".rar", app.ALLOWED)
+
+    def test_temp_file_removed(self):
+        import glob, tempfile
+        self._patch({"a.log": b"x"})
+        before = set(glob.glob(tempfile.gettempdir() + "/*.rar"))
+        from engine.safe_archive import read_rar
+        read_rar(self.MAGIC + b"p")
+        self.assertEqual(set(glob.glob(tempfile.gettempdir() + "/*.rar")), before)
